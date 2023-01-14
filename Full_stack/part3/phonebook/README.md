@@ -10,4 +10,4 @@ The project will run on port 3001, please sure the port is available. And please
     
 ## Deployment
 
-This project is deployed on the fly.io platform and can be accessed through the following link.[https://pre-assignment.fly.dev/]
+This project is deployed on the fly.io platform and can be accessed through the following link.[https://phonebookmorty.fly.dev/]
