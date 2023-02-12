@@ -130,6 +130,9 @@ describe('addition of a new note', () => {
       .expect(401)
       .expect('Content-Type', /application\/json/)
 
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(helper.initialBlogs.length)
+
     expect(result.body.error).toContain('token invalid')
 
   }, 10000)
