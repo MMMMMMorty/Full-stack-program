@@ -19,6 +19,18 @@ beforeEach(async () => {
     let blogObject = new Blog(blog)
     await blogObject.save()
   }
+  await User.deleteMany({})
+
+  for (let user of helper.initialUsers) {
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(user.password, saltRounds)
+    const savedUser = new User({
+      username: user.username,
+      name: user.name,
+      passwordHash,
+    })
+    await savedUser.save()
+  }
 })
 
 describe('when there is initially some notes saved', () => {
@@ -43,16 +55,26 @@ describe('when there is initially some notes saved', () => {
 
 describe('addition of a new note', () => {
   test('a valid blog can be added', async () => {
+
+    const result = await api
+      .post('/api/login')
+      .send(helper.initialUsers[0])
+
+    const token = result.body.token
+
+    const users = await helper.usersInDb()
     const newNote = {
       title: 'Browser test',
       author: 'jambk',
       url: 'abcde',
-      likes: 30
+      likes: 30,
+      userId: users[0].id
     }
 
     await api
       .post('/api/blogs')
       .send(newNote)
+      .set('Authorization', `Bearer ${token}`)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -66,14 +88,22 @@ describe('addition of a new note', () => {
   })
 
   test('a valid blog without like can be added', async () => {
+    const result = await api
+      .post('/api/login')
+      .send(helper.initialUsers[0])
+
+    const token = result.body.token
+    const users = await helper.usersInDb()
     const newNote = {
       title: 'Browser test test',
       author: 'ja',
       url: 'abcdeg',
+      userId: users[0].id
     }
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newNote)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -83,6 +113,25 @@ describe('addition of a new note', () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
     const blogs = blogsAtEnd.filter(r => r.title === 'Browser test test')
     expect(blogs[0].likes).toBe(0)
+  }, 10000)
+
+  test('a valid blog without token', async () => {
+    const users = await helper.usersInDb()
+    const newNote = {
+      title: 'Browser test test',
+      author: 'ja',
+      url: 'abcdeg',
+      userId: users[0].id
+    }
+
+    const result = await api
+      .post('/api/blogs')
+      .send(newNote)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('token invalid')
+
   }, 10000)
 
 })
@@ -116,22 +165,43 @@ describe('fails with statuscode 400 if id is invalid', () => {
 
 describe('deletion of a blog', () => {
   test('succeeds with status code 204 if id is valid', async () => {
-    const blogsAtStart = await helper.blogsInDb()
-    const blogToDelete = blogsAtStart[0]
+
+    const result = await api
+      .post('/api/login')
+      .send(helper.initialUsers[0])
+
+    const token = result.body.token
+
+    const users = await helper.usersInDb()
+    const newNote = {
+      title: 'Browser test',
+      author: 'jambk',
+      url: 'abcde',
+      likes: 30,
+      userId: users[0].id
+    }
+
+    const noteResult = await api
+      .post('/api/blogs')
+      .send(newNote)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
     await api
-      .delete(`/api/blogs/${blogToDelete.id}`)
+      .delete(`/api/blogs/${noteResult.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
 
     expect(blogsAtEnd).toHaveLength(
-      helper.initialBlogs.length - 1
+      helper.initialBlogs.length
     )
 
     const titles = blogsAtEnd.map(r => r.title)
 
-    expect(titles).not.toContain(blogToDelete.title)
+    expect(titles).not.toContain(noteResult.body.title)
   })
 })
 
