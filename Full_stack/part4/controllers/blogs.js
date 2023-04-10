@@ -8,6 +8,11 @@ blogsRouter.get('/', async(request, response) => {
   response.json(blogs)
 })
 
+blogsRouter.get('/:id', async(request, response) => {
+  const blog = await Blog.findById(request.params.id)
+  response.json(blog)
+})
+
 blogsRouter.post('/', middleware.tokenExtractor ,async(request, response) => {
   const body = request.body
   if(body.url === undefined || body.title === undefined){
@@ -28,22 +33,23 @@ blogsRouter.post('/', middleware.tokenExtractor ,async(request, response) => {
       })
       const result = await newBlog.save()
       user.blogs = user.blogs.concat(result._id)
-      user.save()
+      await user.save()
       response.status(201).json(result)
     }
   }
 })
 
 blogsRouter.delete('/:id', middleware.tokenExtractor, async(request, response) => {
+  console.log(request.params.id)
   const blog = await Blog.findById(request.params.id)
   const user = request.user
-  if ( blog.user.toString() === user.id.toString() ) {
+  if ( blog.user._id.toString() === user.id.toString() ) {
     await Blog.findByIdAndRemove(request.params.id)
     response.status(204).end()
   }else{
     return response.status(401).json({
       error: 'token invalid'
-    })
+    }).end()
   }
 
 })
