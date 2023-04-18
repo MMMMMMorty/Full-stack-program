@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setNotification } from '../reducers/notificationReducer'
 import { likeBlog, deleteOneBlog } from '../reducers/blogReducer'
 import { useParams, useNavigate } from 'react-router-dom'
+import Comments from './Comments'
 
 const Blog = () => {
   const navigate = useNavigate()
@@ -53,18 +54,12 @@ const Blog = () => {
   if (same) {
     return (
       <div style={blogStyle}>
-        {/* <div style={hideBlogVisible}>
-          {blog.title}
-          <button className="view-button" onClick={() => setVisible(true)}>
-            view
-          </button>
-        </div> */}
         <div>
-          <div className="blogTitle">{blog.title}</div>
-          <div className="blogAuthor">{blog.author}</div>
+          <h2>{blog.title}</h2>
           <div className="blogUrl">{blog.url}</div>
+          <div className="blogAuthor">created by {blog.author}</div>
           <div className="blogLikes">
-            likes {blog.likes}
+            {blog.likes} likes 
             <button className="like-button" onClick={() => handleLike(blog)}>
               like
             </button>
@@ -72,31 +67,25 @@ const Blog = () => {
           <button className="delete-button" onClick={() => handleDelete(blog)}>
             remove
           </button>
-          {/* <button onClick={() => setVisible(false)}>hide</button> */}
         </div>
+        <Comments blog={blog}/>
       </div>
     )
   } else {
     return (
       <div style={blogStyle}>
-        {/* <div style={hideBlogVisible}>
-          {blog.title}
-          <button className="view-button" onClick={() => setVisible(true)}>
-            view
-          </button>
-        </div> */}
         <div>
-          <div className="blogTitle">{blog.title}</div>
-          <div className="blogAuthor">{blog.author}</div>
+        <h2>{blog.title}</h2>
           <div className="blogUrl">{blog.url}</div>
+          <div className="blogAuthor">created by {blog.author}</div>
           <div className="blogLikes">
-            likes {blog.likes}
+            {blog.likes} likes 
             <button className="like-button" onClick={() => handleLike(blog)}>
               like
             </button>
           </div>
-          {/* <button onClick={() => setVisible(false)}>hide</button> */}
         </div>
+        <Comments blog={blog}/>
       </div>
     )
   }

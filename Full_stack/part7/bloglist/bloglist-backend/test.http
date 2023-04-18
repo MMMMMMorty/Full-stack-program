@@ -50,3 +50,11 @@ content-type: application/json
 
 ###
 GET http://localhost:3003/api/blogs/6415a8c0224afee4e58dfa98
+
+### 
+POST http://localhost:3003/api/blogs/63e9223f76024bd703ce1d04
+content-type: application/json
+
+{
+  "comment": "really good"
+}

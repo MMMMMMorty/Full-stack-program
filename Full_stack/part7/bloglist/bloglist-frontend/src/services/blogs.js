@@ -27,6 +27,14 @@ const likeBlog = async (newBlog) => {
   return response.data
 }
 
+const commentBlog = async (newBlog, comment) => {
+  let message = {
+    comment: comment
+  }
+  const response = await axios.post(baseUrl + '/' + newBlog.id, message)
+  return response.data
+}
+
 const getBlog = async (id) => {
   const response = await axios.get(baseUrl + '/' + id)
   return response.data
@@ -41,4 +49,4 @@ const deleteBlog = async (id, token) => {
   return response
 }
 
-export default { getAll, createBlog, likeBlog, getBlog, deleteBlog }
+export default { getAll, createBlog, likeBlog, getBlog, deleteBlog, commentBlog }
