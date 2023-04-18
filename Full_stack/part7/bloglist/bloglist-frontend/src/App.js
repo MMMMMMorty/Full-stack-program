@@ -1,30 +1,36 @@
 import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
-// import ErrorMessage from './components/ErrorMessage'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
-import NewNote from './components/NewNote'
 import './App.css'
 import { setNotification } from './reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import { initializeBlogs } from './reducers/blogReducer'
 import { logoutUser } from './reducers/userReducer'
+import Blogs from './components/Blogs'
+import Blog from './components/Blog'
+import Users from './components/Users'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useParams,
+  useNavigate,
+} from 'react-router-dom'
+import User from './components/User'
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button
+} from '@mui/material'
+
 
 const App = () => {
-  // const [blogs, setBlogs] = useState([])
-  const tmp = useSelector((state) => state.blogs)
-  const blogs = tmp
-    .filter((blog) => blog != null)
-    .sort((a, b) => b.likes - a.likes)
   const user = useSelector((state) => state.user)
-  // const [user, setUser] = useState(null)
+  const users = useSelector((state) => state.users)
   const [loginVisible, setLoginVisible] = useState(false)
 
-  // useEffect(() => {
-  //   blogService
-  //     .getAll()
-  //     .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)))
-  // }, [])
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -39,9 +45,6 @@ const App = () => {
     dispatch(setNotification(`Succefully Logout`, 5000))
   }
 
-  const hideWhenVisible = { display: loginVisible ? 'none' : '' }
-  const showWhenVisible = { display: loginVisible ? '' : 'none' }
-
   if (user === null) {
     return (
       <div>
@@ -55,28 +58,50 @@ const App = () => {
     <div>
       <h2>blogs</h2>
       <Notification />
-      <div>
-        {user.username} logged in
-        <button type="submit" onClick={handleLogout}>
-          logout
-        </button>
-      </div>
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>new note</button>
-        </div>
-        <div style={showWhenVisible}>
-          <NewNote user={user} />
-        </div>
-        <button onClick={() => setLoginVisible(false)}>cancel</button>
-      </div>
-      {blogs.map((blog) => (
-        <>
-          <div>
-            <Blog key={blog.id} blog={blog} user={user} />
-          </div>
-        </>
-      ))}
+      <Router>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu">
+          </IconButton>
+          <Button color="inherit">
+            <Link to="/">bloglists</Link>
+          </Button>
+          <Button color="inherit">
+            <Link to="/users">users</Link>
+          </Button>
+          <em>{user.username} logged in</em>
+          <Button color="inherit" onClick={handleLogout}>
+            logout
+          </Button>                
+        </Toolbar>
+      </AppBar>
+
+        <Link className="linkPadding" to="/">
+          bloglists
+        </Link>
+        {/* <Blogs loginVisible={loginVisible} setLoginVisible={setLoginVisible} /> */}
+        <Link className="linkPadding" to="/users">
+          users
+        </Link>
+
+        {/* <Users /> */}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Blogs
+                loginVisible={loginVisible}
+                setLoginVisible={setLoginVisible}
+              />
+            }
+          />
+          <Route path="/blogs/:id" element={<Blog/>} />
+          {/* <Blog key={blog.id} blog={blog} user={user} /> */}
+
+          <Route path="/users/:id" element={<User users={users} />} />
+          <Route path="/users" element={<Users />} />
+        </Routes>
+      </Router>
     </div>
   )
 }
